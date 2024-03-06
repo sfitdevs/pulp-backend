@@ -1,3 +1,4 @@
+const  { redis } = require('../../redis.js')
 const express = require("express");
 const shortUniqueId = require("short-unique-id");
 const { base } = require("../../deta");
@@ -13,19 +14,37 @@ router.get("/:key", async (req, res) => {
         let { key } = req.params;
         let { type } = req.query;
         if (!key) return res.status(400).json({ message: "key not specified" });
-        let pulpData = await base.get(key);
-        if (!pulpData) return res.status(404).json({ message: "pulp not found" });
-        switch (type) {
-            case "raw":
-                res.set("content-type", "text/plain").status(200).send(pulpData.content);
-                break;
-            case "download":
-                res.set({ "content-type": "text/plain", "content-disposition": `attachment;filename=${pulpData.key}.${pulpData.language}` }).status(200).send(pulpData.content);
-                break;
-            default:
-                res.status(200).json((({ password, accessKey, ...data }) => data)(pulpData));
-                break;
+        //await redis.set('hello','world')
+        //let pulpData = await base.get(key);
+        let  pulpDataC = await redis.get(key)
+        if(pulpDataC){
+            return res.status(200).json({...pulpDataC, "m":"from cache"});
+        }else {
+            let pulpData  = await base.get(key)
+            if(pulpData){
+                
+                await redis.set(pulpData.key, pulpData);
+                return res.status(200).json({...pulpDataC, "m":"from database"});
+
+         
+            }else{
+                return res.status(404).json({ message: "pulp not found" });
+ 
+            }
         }
+
+        // if (!pulpData) return res.status(404).json({ message: "pulp not found" });
+        // switch (type) {
+        //     case "raw":
+        //         res.set("content-type", "text/plain").status(200).send(pulpData.content);
+        //         break;
+        //     case "download":
+        //         res.set({ "content-type": "text/plain", "content-disposition": `attachment;filename=${pulpData.key}.${pulpData.language}` }).status(200).send(pulpData.content);
+        //         break;
+        //     default:
+        //         res.status(200).json((({ password, accessKey, ...data }) => data)(pulpData));
+        //         break;
+        // }
         updateViews(key);
     } catch (error) {
         res.status(500).json({ message: "internal server error" });
