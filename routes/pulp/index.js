@@ -11,10 +11,19 @@ const accessKeyGenerator = new shortUniqueId.default({ dictionary: "hex", length
 router.get("/:key", async (req, res) => {
     try {
         let { key } = req.params;
-        let { type } = req.query;
+        let { type, password } = req.query;
         if (!key) return res.status(400).json({ message: "key not specified" });
         let pulpData = await base.get(key);
+        // no pulp found in database
         if (!pulpData) return res.status(404).json({ message: "pulp not found" });
+        // pulp has password, do some checks | we can use auth headers but for now its okay, maybe future?
+        if (pulpData.password) {
+            // no password provided
+            if (!password) return res.status(401).json({ message: "pulp is protected" });
+            // user supplied a password but its not right
+            if (pulpData.password != password) return res.status(401).json({ message: "password entered is wrong" });
+        }
+        // switch type if all above cases are satisfied
         switch (type) {
             case "raw":
                 res.set("content-type", "text/plain").status(200).send(pulpData.content);
@@ -26,7 +35,7 @@ router.get("/:key", async (req, res) => {
                 res.status(200).json((({ password, accessKey, ...data }) => data)(pulpData));
                 break;
         }
-        updateViews(key);
+        await updateViews(key);
     } catch (error) {
         res.status(500).json({ message: "internal server error" });
     }
