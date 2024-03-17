@@ -1,4 +1,4 @@
-const  { redis } = require('../../redis.js')
+const { redis } = require('../../redis.js')
 const express = require("express");
 const shortUniqueId = require("short-unique-id");
 const { base } = require("../../deta");
@@ -14,22 +14,21 @@ router.get("/:key", async (req, res) => {
         let { key } = req.params;
         let { type } = req.query;
         if (!key) return res.status(400).json({ message: "key not specified" });
-        //await redis.set('hello','world')
-        //let pulpData = await base.get(key);
-        let  pulpDataC = await redis.get(key)
-        if(pulpDataC){
-            return res.status(200).json({...pulpDataC, "m":"from cache"});
-        }else {
-            let pulpData  = await base.get(key)
-            if(pulpData){
-                
-                await redis.set(pulpData.key, pulpData);
-                return res.status(200).json({...pulpDataC, "m":"from database"});
 
-         
-            }else{
+        let pulpDataC = await redis.get(key)
+        if (pulpDataC) {
+            return res.status(200).json((({ password, accessKey, ...data }) => data)({ ...pulpDataC, m: "From Cache" }));
+        } else {
+            let pulpData = await base.get(key)
+            if (pulpData) {
+
+                await redis.set(pulpData.key, pulpData);
+                return res.status(200).json((({ password, accessKey, ...data }) => data)({ ...pulpData, m: "From Database" }));
+
+
+            } else {
                 return res.status(404).json({ message: "pulp not found" });
- 
+
             }
         }
 

@@ -1,4 +1,4 @@
-const { error } =  require("console");
+const { error } = require("console");
 const { Redis } = require('@upstash/redis');
 
 const redis = new Redis({
@@ -6,4 +6,4 @@ const redis = new Redis({
     token: '',
 })
 
-module.exports = {redis}
+module.exports = { redis }

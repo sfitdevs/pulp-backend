@@ -1,8 +1,10 @@
 const express = require("express");
+const { redis } = require('../../redis.js')
 const { v4: uuid } = require("uuid");
 const expressfu = require("express-fileupload");
 const { drive } = require("../../deta");
 const router = express.Router();
+
 
 router.use(expressfu({
     limits: {
@@ -33,5 +35,6 @@ router.get("/:id", async (req, res) => {
         res.status(500).json({ message: "couldn't get file" });
     }
 });
+
 
 module.exports = router;
