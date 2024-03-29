@@ -41,6 +41,23 @@ router.get("/:key", async (req, res) => {
     }
 });
 
+router.put("/", async (req, res) => {
+    try {
+        let { content, accessKey } = req.body;
+        if (!content) return res.status(400).json({ message: "content can't be empty" });
+        if (!accessKey) return res.status(400).json({ message: "accessKey not specified" });
+        let { items, count } = await base.fetch({ accessKey });
+        if (count) {
+            await base.update({ content }, items[0].key);
+            res.header(200).json({ message: "updated" });
+        } else {
+            res.status(404).json({ message: "pulp not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: "internal server error" });
+    }
+});
+
 router.post("/", async ({ body }, res) => {
     try {
         if (!body.content) return res.status(400).json({ message: "content can't be empty" });
