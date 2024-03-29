@@ -10,4 +10,7 @@ router.use("/pulp", require("./pulp"));
 // router to handle explore section
 router.use("/explore", require("./explore"));
 
+// router to handle collection section
+router.use("/collection", require("./collection"));
+
 module.exports = router;

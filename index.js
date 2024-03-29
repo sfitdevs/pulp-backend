@@ -9,7 +9,7 @@ app.use(cors("*"));
 
 app.use("/", require("./routes/api.js"));
 
-app.get('*', ({ res }) => {
+app.get("*", ({ res }) => {
     res.status(404).json({ message: "not found" });
 });
 
