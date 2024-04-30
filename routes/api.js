@@ -13,4 +13,7 @@ router.use("/explore", require("./explore"));
 // router to handle collection section
 router.use("/collection", require("./collection"));
 
+// router to handle emails
+router.use("/mail", require("./mail"));
+
 module.exports = router;
